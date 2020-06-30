@@ -99,7 +99,6 @@ func (c *Conway) Simulate(numGenerations int) {
 	for i := 0; i < numGenerations; i++ {
 		c.simulateOneGeneration()
 	}
-	return
 }
 
 // simulateOneGeneration runs simulations for conway's game of life
