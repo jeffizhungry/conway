@@ -70,7 +70,7 @@ func (c *Conway) Parse(input io.Reader) error {
 	return nil
 }
 
-// PrintLife106Format parses contents with Life 1.06 format
+// PrintLife106Format prints contents with Life 1.06 format to output
 func (c *Conway) PrintLife106Format(output io.Writer) error {
 	if _, err := output.Write([]byte("#Life 1.06\n")); err != nil {
 		return err
