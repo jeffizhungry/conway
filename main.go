@@ -19,6 +19,10 @@ type Point struct {
 	Y int64
 }
 
+// ------------------------------------
+// Game of Life
+// ------------------------------------
+
 // Conway encapsulates logic for Conway's Game of Life
 type Conway struct {
 	Living map[Point]bool
@@ -89,6 +93,62 @@ func (c *Conway) Simulate(numGenerations int) {
 	return
 }
 
+func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
+	neighbors := computeValidNeighbors(p)
+	var result int
+	for _, p := range neighbors {
+		if c.Living[p] {
+			result++
+		}
+	}
+	return result
+}
+
+// simulateOneGeneration runs simulations for conway's game of life
+func (c *Conway) simulateOneGeneration() {
+	nextGeneration := map[Point]bool{}
+	for k, v := range c.Living {
+		nextGeneration[k] = v
+	}
+
+	// --------------------------------
+	// Compute deaths
+	// --------------------------------
+	for p := range c.Living {
+		n := c.findNumberOfLivingNeighbors(p)
+		if shouldDie(n) {
+			delete(nextGeneration, p)
+		}
+	}
+
+	// --------------------------------
+	// Compute births
+	// --------------------------------
+
+	// Get list of empty cells that could possibly be reborn next round
+	var possibleBabies []Point
+	for p := range c.Living {
+		neighbors := computeValidNeighbors(p)
+		for _, p := range neighbors {
+			if !c.Living[p] {
+				possibleBabies = append(possibleBabies, p)
+			}
+		}
+	}
+	for _, p := range possibleBabies {
+		n := c.findNumberOfLivingNeighbors(p)
+		if shouldBeReborn(n) {
+			nextGeneration[p] = true
+		}
+	}
+	c.Living = nextGeneration
+	return
+}
+
+// ------------------------------------
+// Helper Functions
+// ------------------------------------
+
 // computeValidNeighbors returns a slice of all neighbors that are within a int64 grid
 func computeValidNeighbors(p Point) []Point {
 	x, y := p.X, p.Y
@@ -120,62 +180,12 @@ func computeValidNeighbors(p Point) []Point {
 	return neighbors
 }
 
-func (c *Conway) shouldDie(p Point) bool {
-	n := c.findNumberOfLivingNeighbors(p)
-	if n < 2 || n > 3 {
-		return true
-	}
-	return false
+func shouldDie(numLivingNeighbors int) bool {
+	return numLivingNeighbors < 2 || numLivingNeighbors > 3
 }
 
-func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
-	neighbors := computeValidNeighbors(p)
-	var result int
-	for _, p := range neighbors {
-		if c.Living[p] {
-			result++
-		}
-	}
-	return result
-}
-
-// simulateOneGeneration runs simulations for conway's game of life
-func (c *Conway) simulateOneGeneration() {
-	nextGeneration := map[Point]bool{}
-	for k, v := range c.Living {
-		nextGeneration[k] = v
-	}
-
-	// --------------------------------
-	// Compute deaths
-	// --------------------------------
-	for p := range c.Living {
-		if c.shouldDie(p) {
-			delete(nextGeneration, p)
-		}
-	}
-
-	// --------------------------------
-	// Compute births
-	// --------------------------------
-
-	// Get list of empty cells that could possibly be reborn next round
-	var possibleBabies []Point
-	for p := range c.Living {
-		neighbors := computeValidNeighbors(p)
-		for _, p := range neighbors {
-			if !c.Living[p] {
-				possibleBabies = append(possibleBabies, p)
-			}
-		}
-	}
-	for _, p := range possibleBabies {
-		if c.findNumberOfLivingNeighbors(p) == 3 {
-			nextGeneration[p] = true
-		}
-	}
-	c.Living = nextGeneration
-	return
+func shouldBeReborn(numLivingNeighbors int) bool {
+	return numLivingNeighbors == 3
 }
 
 func main() {
