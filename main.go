@@ -117,8 +117,6 @@ func (c *Conway) simulateOneGeneration() {
 	// Compute deaths
 	// --------------------------------
 	for p := range c.Living {
-		// NOTE(jehwang): Instead of computing valid neighbors,
-		// could just do lookup there to save memory
 		n := c.findNumberOfLivingNeighbors(p)
 		if shouldDie(n) {
 			delete(nextGeneration, p)
@@ -191,7 +189,6 @@ func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
 	}
 	return result
 }
-
 
 // ------------------------------------
 // Helper Functions
