@@ -25,7 +25,7 @@ type Point struct {
 
 // Conway encapsulates logic for Conway's Game of Life
 type Conway struct {
-	// Using this data structure for quick lookups + simplicity
+	// Using this data structure for quick lookups and to handle large integers
 	// Assuming a reasonable amount of living datapoints
 	Living map[Point]bool
 }
