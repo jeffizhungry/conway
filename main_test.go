@@ -150,3 +150,41 @@ func Test_computeValidNeighbors(t *testing.T) {
 		})
 	}
 }
+
+func Test_shouldDie(t *testing.T) {
+	testcases := []struct {
+		numLivingNeighbors int
+		expected           bool
+	}{
+		{-1, true},
+		{0, true},
+		{1, true},
+		{2, false},
+		{3, false},
+		{4, true},
+		{8, true},
+	}
+	for _, tc := range testcases {
+		actual := shouldDie(tc.numLivingNeighbors)
+		assert.Equal(t, tc.expected, actual)
+	}
+}
+
+func Test_shouldBeReborn(t *testing.T) {
+	testcases := []struct {
+		numLivingNeighbors int
+		expected           bool
+	}{
+		{-1, false},
+		{0, false},
+		{1, false},
+		{2, false},
+		{3, true},
+		{4, false},
+		{8, false},
+	}
+	for _, tc := range testcases {
+		actual := shouldBeReborn(tc.numLivingNeighbors)
+		assert.Equal(t, tc.expected, actual)
+	}
+}
