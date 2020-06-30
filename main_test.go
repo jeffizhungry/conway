@@ -11,30 +11,65 @@ import (
 // End to end test
 func TestConawy(t *testing.T) {
 	testcases := map[string]struct {
-		input          string
 		numGenerations int
+		input          string
 		expected       string
 	}{
-		"no generations": {
+		// 		"no generations": {
+		// 			numGenerations: 0,
+		// 			input: `#Life 1.06
+		// 		-1 1
+		// 		0 -1
+		// 		0 1
+		// 		1 0
+		// 		1 1`,
+		// 			expected: `#Life 1.06
+		// 		-1 1
+		// 		0 -1
+		// 		0 1
+		// 		1 0
+		// 		1 1`,
+		// 		},
+		// 		"single cell, immediate death": {
+		// 			numGenerations: 1,
+		// 			input: `#Life 1.06
+		// 		1 1`,
+		// 			expected: "#Life 1.06\n",
+		// 		},
+		// 		"still life": {
+		// 			numGenerations: 20,
+		// 			input: `#Life 1.06
+		// 0 0
+		// 0 1
+		// 1 0
+		// 1 1`,
+		// 			expected: `#Life 1.06
+		// 0 0
+		// 0 1
+		// 1 0
+		// 1 1`,
+		// 		},
+		"oscillator (even number of gens)": {
+			numGenerations: 2000,
 			input: `#Life 1.06
--1 1
-0 -1
-0 1
-1 0
-1 1`,
-			numGenerations: 0,
+-1 0
+0 0
+1 0`,
 			expected: `#Life 1.06
--1 1
-0 -1
-0 1
-1 0
-1 1`,
+-1 0
+0 0
+1 0`,
 		},
-		"single cell, immediate death": {
+		"oscillator (odd number of gens)": {
+			numGenerations: 2001,
 			input: `#Life 1.06
-1 1`,
-			numGenerations: 1,
-			expected:       "#Life 1.06\n",
+-1 0
+0 0
+1 0`,
+			expected: `#Life 1.06
+0 -1
+0 0
+0 1`,
 		},
 	}
 	for testName, tc := range testcases {

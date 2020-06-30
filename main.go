@@ -136,7 +136,7 @@ func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
 			result++
 		}
 	}
-	return 0
+	return result
 }
 
 // simulateOneGeneration runs simulations for conway's game of life
