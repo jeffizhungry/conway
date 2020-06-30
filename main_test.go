@@ -9,17 +9,18 @@ import (
 
 func TestConawy(t *testing.T) {
 	testcases := map[string]struct {
-		input      string
-		iterations int
-		expected   string
+		input          string
+		numGenerations int
+		expected       string
 	}{
-		"basic": {
+		"no generations": {
 			input: `#Life 1.06
 -1 1
 0 -1
 0 1
 1 0
 1 1`,
+			numGenerations: 0,
 			expected: `#Life 1.06
 -1 1
 0 -1
@@ -38,6 +39,7 @@ func TestConawy(t *testing.T) {
 			assert.NoError(t, c.Parse(input))
 
 			// Run simulations
+			c.Simulate(tc.numGenerations)
 
 			// Compare
 			output := bytes.Buffer{}
