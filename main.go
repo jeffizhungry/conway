@@ -25,6 +25,8 @@ type Point struct {
 
 // Conway encapsulates logic for Conway's Game of Life
 type Conway struct {
+	// Using this data structure for quick lookups + simplicity
+	// Assuming a reasonable amount of living datapoints
 	Living map[Point]bool
 }
 
@@ -33,11 +35,17 @@ func NewConway() *Conway {
 	return &Conway{Living: map[Point]bool{}}
 }
 
-// Parse parses contents with Life 1.06 format
+// Parse parses contents with Life 1.06 format and stores
+// coordinate data in Conway.Living
+//
+// TODO(jehwang): Ask about how we want to handle invalid data,
+// fail hard or handle gracefully?
 func (c *Conway) Parse(input io.Reader) error {
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
+
+		// TODO(jehwang): Should consider a file invalid if it doesn't have this header?
 		if line == "#Life 1.06" {
 			continue
 		}
@@ -78,6 +86,7 @@ func (c *Conway) PrintLife106Format(output io.Writer) error {
 	if len(lines) == 0 {
 		return nil
 	}
+	// Sort for stable output
 	sort.Slice(lines, func(i, j int) bool {
 		return lines[i] < lines[j]
 	})
@@ -93,6 +102,8 @@ func (c *Conway) Simulate(numGenerations int) {
 	return
 }
 
+// findNumberOfLivingNeighbors computes number of living neighbors
+// OPTIMIZE(jehwang): instead of computing neighbors just do the lookup
 func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
 	neighbors := computeValidNeighbors(p)
 	var result int
@@ -111,10 +122,16 @@ func (c *Conway) simulateOneGeneration() {
 		nextGeneration[k] = v
 	}
 
+	// NOTE(jehwang): Could parallelize by chopping up living dataset
+	// and parallelize w.r.t # of cores. Would need to introduce lock
+	// on c.Living and collect data on deaths / births
+
 	// --------------------------------
 	// Compute deaths
 	// --------------------------------
 	for p := range c.Living {
+		// NOTE(jehwang): Instead of computing valid neighbors,
+		// could just do lookup there to save memory
 		n := c.findNumberOfLivingNeighbors(p)
 		if shouldDie(n) {
 			delete(nextGeneration, p)
@@ -180,20 +197,30 @@ func computeValidNeighbors(p Point) []Point {
 	return neighbors
 }
 
+// shouldDie encasulates rule about whether an "alive" cell should die
 func shouldDie(numLivingNeighbors int) bool {
 	return numLivingNeighbors < 2 || numLivingNeighbors > 3
 }
 
+// shouldBeReborn encasulates rule about whether a "dead" cell should be reborn
 func shouldBeReborn(numLivingNeighbors int) bool {
 	return numLivingNeighbors == 3
 }
 
 func main() {
+	// Init
 	c := NewConway()
+
+	// Read data
+	// NOTE(jehwang): This will block if nothing is provided in stdin
 	if err := c.Parse(os.Stdin); err != nil {
 		logrus.WithError(err).Fatal("Failed to read input")
 	}
+
+	// Run simulations
 	c.Simulate(10)
+
+	// Print out output
 	if err := c.PrintLife106Format(os.Stdout); err != nil {
 		logrus.WithError(err).Fatal("Failed to print output")
 	}
