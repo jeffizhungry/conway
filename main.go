@@ -71,6 +71,9 @@ func (c *Conway) PrintLife106Format(output io.Writer) error {
 		y := strconv.Itoa(int(p.Y))
 		lines = append(lines, fmt.Sprintf("%v %v", x, y))
 	}
+	if len(lines) == 0 {
+		return nil
+	}
 	sort.Slice(lines, func(i, j int) bool {
 		return lines[i] < lines[j]
 	})
@@ -86,7 +89,8 @@ func (c *Conway) Simulate(numGenerations int) {
 	return
 }
 
-func (c *Conway) findValidNeighbors(p Point) []Point {
+// computeValidNeighbors returns a slice of all neighbors that are within a int64 grid
+func computeValidNeighbors(p Point) []Point {
 	x, y := p.X, p.Y
 	var neighbors []Point
 	if x != math.MinInt64 && y != math.MinInt64 {
@@ -125,7 +129,7 @@ func (c *Conway) shouldDie(p Point) bool {
 }
 
 func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
-	neighbors := c.findValidNeighbors(p)
+	neighbors := computeValidNeighbors(p)
 	var result int
 	for _, p := range neighbors {
 		if c.Living[p] {
@@ -158,7 +162,7 @@ func (c *Conway) simulateOneGeneration() {
 	// Get list of empty cells that could possibly be reborn next round
 	var possibleBabies []Point
 	for p := range c.Living {
-		neighbors := c.findValidNeighbors(p)
+		neighbors := computeValidNeighbors(p)
 		for _, p := range neighbors {
 			if !c.Living[p] {
 				possibleBabies = append(possibleBabies, p)
