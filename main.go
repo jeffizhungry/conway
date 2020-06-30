@@ -102,47 +102,6 @@ func (c *Conway) Simulate(numGenerations int) {
 	return
 }
 
-// findNumberOfLivingNeighbors computes number of living neighbors
-// OPTIMIZE(jehwang): instead of computing neighbors just do the lookup
-func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
-	// Old Implementation
-	// neighbors := computeValidNeighbors(p)
-	// var result int
-	// for _, p := range neighbors {
-	// 	if c.Living[p] {
-	// 		result++
-	// 	}
-	// }
-
-	x, y := p.X, p.Y
-	var result int
-	if x != math.MinInt64 && y != math.MinInt64 && c.Living[Point{x - 1, y - 1}] {
-		result++
-	}
-	if x != math.MinInt64 && c.Living[Point{x - 1, y}] {
-		result++
-	}
-	if x != math.MinInt64 && y != math.MaxInt64 && c.Living[Point{x - 1, y + 1}] {
-		result++
-	}
-	if y != math.MinInt64 && c.Living[Point{x, y - 1}] {
-		result++
-	}
-	if y != math.MaxInt64 && c.Living[Point{x, y + 1}] {
-		result++
-	}
-	if x != math.MaxInt64 && y != math.MinInt64 && c.Living[Point{x + 1, y - 1}] {
-		result++
-	}
-	if x != math.MaxInt64 && c.Living[Point{x + 1, y}] {
-		result++
-	}
-	if x != math.MaxInt64 && y != math.MaxInt64 && c.Living[Point{x + 1, y + 1}] {
-		result++
-	}
-	return result
-}
-
 // simulateOneGeneration runs simulations for conway's game of life
 func (c *Conway) simulateOneGeneration() {
 	nextGeneration := map[Point]bool{}
@@ -187,8 +146,52 @@ func (c *Conway) simulateOneGeneration() {
 		}
 	}
 	c.Living = nextGeneration
-	return
 }
+
+func (c *Conway) isLiving(p Point) bool {
+	return c.Living[p]
+}
+
+// findNumberOfLivingNeighbors computes number of living neighbors
+func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
+	// Old Implementation
+	// neighbors := computeValidNeighbors(p)
+	// var result int
+	// for _, p := range neighbors {
+	// 	if c.Living[p] {
+	// 		result++
+	// 	}
+	// }
+
+	x, y := p.X, p.Y
+	var result int
+	if x != math.MinInt64 && y != math.MinInt64 && c.isLiving(Point{x - 1, y - 1}) {
+		result++
+	}
+	if x != math.MinInt64 && c.isLiving(Point{x - 1, y}) {
+		result++
+	}
+	if x != math.MinInt64 && y != math.MaxInt64 && c.isLiving(Point{x - 1, y + 1}) {
+		result++
+	}
+	if y != math.MinInt64 && c.isLiving(Point{x, y - 1}) {
+		result++
+	}
+	if y != math.MaxInt64 && c.isLiving(Point{x, y + 1}) {
+		result++
+	}
+	if x != math.MaxInt64 && y != math.MinInt64 && c.isLiving(Point{x + 1, y - 1}) {
+		result++
+	}
+	if x != math.MaxInt64 && c.isLiving(Point{x + 1, y}) {
+		result++
+	}
+	if x != math.MaxInt64 && y != math.MaxInt64 && c.isLiving(Point{x + 1, y + 1}) {
+		result++
+	}
+	return result
+}
+
 
 // ------------------------------------
 // Helper Functions
