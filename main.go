@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -77,11 +78,108 @@ func (c *Conway) PrintLife106Format(output io.Writer) error {
 	return err
 }
 
+// Simulate runs simulations for conway's game of life
+func (c *Conway) Simulate(numGenerations int) {
+	for i := 0; i < numGenerations; i++ {
+		c.simulateOneGeneration()
+	}
+	return
+}
+
+func (c *Conway) findValidNeighbors(p Point) []Point {
+	x, y := p.X, p.Y
+	var neighbors []Point
+	if x != math.MinInt64 && y != math.MinInt64 {
+		neighbors = append(neighbors, Point{x - 1, y - 1})
+	}
+	if x != math.MinInt64 {
+		neighbors = append(neighbors, Point{x - 1, y})
+	}
+	if x != math.MinInt64 && y != math.MaxInt64 {
+		neighbors = append(neighbors, Point{x - 1, y + 1})
+	}
+	if y != math.MinInt64 {
+		neighbors = append(neighbors, Point{x, y - 1})
+	}
+	if y != math.MaxInt64 {
+		neighbors = append(neighbors, Point{x, y + 1})
+	}
+	if x != math.MaxInt64 && y != math.MinInt64 {
+		neighbors = append(neighbors, Point{x + 1, y - 1})
+	}
+	if x != math.MaxInt64 {
+		neighbors = append(neighbors, Point{x + 1, y})
+	}
+	if x != math.MaxInt64 && y != math.MaxInt64 {
+		neighbors = append(neighbors, Point{x + 1, y + 1})
+	}
+	return neighbors
+}
+
+func (c *Conway) shouldDie(p Point) bool {
+	n := c.findNumberOfLivingNeighbors(p)
+	if n < 2 || n > 3 {
+		return true
+	}
+	return false
+}
+
+func (c *Conway) findNumberOfLivingNeighbors(p Point) int {
+	neighbors := c.findValidNeighbors(p)
+	var result int
+	for _, p := range neighbors {
+		if c.Living[p] {
+			result++
+		}
+	}
+	return 0
+}
+
+// simulateOneGeneration runs simulations for conway's game of life
+func (c *Conway) simulateOneGeneration() {
+	nextGeneration := map[Point]bool{}
+	for k, v := range c.Living {
+		nextGeneration[k] = v
+	}
+
+	// --------------------------------
+	// Compute deaths
+	// --------------------------------
+	for p := range c.Living {
+		if c.shouldDie(p) {
+			delete(nextGeneration, p)
+		}
+	}
+
+	// --------------------------------
+	// Compute births
+	// --------------------------------
+
+	// Get list of empty cells that could possibly be reborn next round
+	var possibleBabies []Point
+	for p := range c.Living {
+		neighbors := c.findValidNeighbors(p)
+		for _, p := range neighbors {
+			if !c.Living[p] {
+				possibleBabies = append(possibleBabies, p)
+			}
+		}
+	}
+	for _, p := range possibleBabies {
+		if c.findNumberOfLivingNeighbors(p) == 3 {
+			nextGeneration[p] = true
+		}
+	}
+	c.Living = nextGeneration
+	return
+}
+
 func main() {
 	c := NewConway()
 	if err := c.Parse(os.Stdin); err != nil {
 		logrus.WithError(err).Fatal("Failed to read input")
 	}
+	c.Simulate(10)
 	if err := c.PrintLife106Format(os.Stdout); err != nil {
 		logrus.WithError(err).Fatal("Failed to print output")
 	}
