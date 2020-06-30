@@ -94,10 +94,27 @@ func (c *Conway) PrintLife106Format(output io.Writer) error {
 	return err
 }
 
+// RenderToStdout prints a small window of the current board.
+func (c *Conway) RenderToStdout() {
+	for x := int64(-5); x <= 5; x++ {
+		for y := int64(-5); y <= 5; y++ {
+			if c.Living[Point{x, y}] {
+				fmt.Printf("X ")
+			} else {
+				fmt.Printf("  ")
+			}
+		}
+		fmt.Println("")
+	}
+	fmt.Println("")
+}
+
 // Simulate runs simulations for conway's game of life
 func (c *Conway) Simulate(numGenerations int) {
+	// c.RenderToStdout()
 	for i := 0; i < numGenerations; i++ {
 		c.simulateOneGeneration()
+		// c.RenderToStdout()
 	}
 }
 
